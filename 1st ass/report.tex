@@ -1,0 +1,329 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[a4paper,margin=1in]{geometry}
+\usepackage{setspace}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{hyperref}
+\usepackage{float}
+
+\setstretch{1.25}
+\setlist{nosep}
+\setlength{\parindent}{2em}
+\setlength{\parskip}{0.5em}
+
+\titleformat{\section}{\large\bfseries}{\thesection}{0.75em}{}
+\titleformat{\subsection}{\normalsize\bfseries}{\thesubsection}{0.75em}{}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{Spring IoC/DI Experimental Report}
+\fancyhead[R]{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    urlcolor=blue,
+    pdftitle={Academic Experimental Report for the Spring IoC/DI Project},
+    pdfauthor={Student Placeholder}
+}
+
+\definecolor{codebg}{RGB}{248,248,248}
+\definecolor{codeborder}{RGB}{220,220,220}
+\definecolor{codeblue}{RGB}{0,74,173}
+\definecolor{codegreen}{RGB}{34,139,34}
+\definecolor{codered}{RGB}{176,48,96}
+
+\lstdefinestyle{commonstyle}{
+    backgroundcolor=\color{codebg},
+    basicstyle=\ttfamily\small,
+    frame=single,
+    rulecolor=\color{codeborder},
+    keywordstyle=\color{codeblue}\bfseries,
+    commentstyle=\color{codegreen},
+    stringstyle=\color{codered},
+    breaklines=true,
+    columns=fullflexible,
+    showstringspaces=false,
+    tabsize=4
+}
+
+\lstdefinestyle{javastyle}{
+    style=commonstyle,
+    language=Java
+}
+
+\lstdefinestyle{xmlstyle}{
+    style=commonstyle,
+    language=XML
+}
+
+\begin{document}
+
+\begin{titlepage}
+    \centering
+    \vspace*{2cm}
+
+    {\Large\bfseries Academic Experimental Report\par}
+    \vspace{0.8cm}
+    {\LARGE\bfseries Spring IoC, Bean Configuration, and Dependency Injection Project\par}
+    \vspace{1.2cm}
+    {\large Based on a Spring Boot introductory web application\par}
+
+    \vspace{2cm}
+
+    \begin{tabular}{>{\bfseries}p{4.2cm} p{8.5cm}}
+        Experiment Title: & Spring IoC/DI Introductory Project Experiment \\
+        Student Name: & [Please fill in] \\
+        Student ID: & [Please fill in] \\
+        Class / Major: & [Please fill in] \\
+        Course Name: & [Please fill in] \\
+        Instructor: & [Please fill in] \\
+        Submission Date: & [Please fill in] \\
+    \end{tabular}
+
+    \vfill
+    {\large Department of Computer Science / Software Engineering\par}
+\end{titlepage}
+
+\pagenumbering{roman}
+
+\section*{Abstract}
+This experimental report documents the design, implementation, and verification of a beginner-level Spring project centered on the core concepts of the Spring Framework, namely Inversion of Control (IoC), bean management, and Dependency Injection (DI). The project uses a mixed configuration approach in which the data access object is declared through XML and the service and controller layers are discovered through annotations. To demonstrate the configuration results clearly, the experiment exposes the output through a lightweight Spring Boot web application and a Thymeleaf page running on port 8000. The report explains the theoretical basis of the experiment, the architecture of the implemented system, the role of each project component, and the observed results from runtime and automated verification. The experiment shows that Spring can effectively reduce coupling between components, improve clarity of object management, and provide a flexible foundation for structured Java web development.
+
+\noindent\textbf{Keywords:} Spring Framework, IoC, Dependency Injection, Bean Configuration, XML Configuration, Annotation Configuration, Spring Boot, Thymeleaf
+
+\tableofcontents
+\newpage
+
+\pagenumbering{arabic}
+
+\section{Experimental Objectives}
+The main objectives of this experiment are as follows:
+\begin{enumerate}
+    \item To understand the role of the Spring IoC container in object creation and lifecycle management.
+    \item To study the implementation of Dependency Injection through both XML-based and annotation-based configuration.
+    \item To design a simple layered Spring project containing a model, DAO, service, controller, and web view.
+    \item To verify that a bean defined in an XML configuration file can be injected into an annotation-managed service.
+    \item To demonstrate the experimental result through a browser-accessible page so that the IoC/DI mechanism can be observed clearly.
+\end{enumerate}
+
+\section{Development Environment}
+Table~\ref{tab:environment} summarizes the development and runtime environment used in this experiment.
+
+\begin{table}[H]
+    \centering
+    \caption{Development Environment}
+    \label{tab:environment}
+    \begin{tabular}{>{\raggedright\arraybackslash}p{4cm} >{\raggedright\arraybackslash}p{9.5cm}}
+        \toprule
+        Item & Description \\
+        \midrule
+        Operating System & Windows 11 \\
+        JDK Version & OpenJDK 17 \\
+        Build Tool & Maven 3.9.11 \\
+        Framework Base & Spring Boot 3.5.9 \\
+        Core Spring Module & Spring Context (managed through Spring Boot dependencies) \\
+        View Technology & Thymeleaf \\
+        Programming Language & Java 17 \\
+        Test Framework & Spring Boot Test with JUnit 5 \\
+        Web Server & Embedded Tomcat \\
+        Application Port & 8000 \\
+        Browser Verification & Modern desktop web browser \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\section{Experimental Background and Theory}
+
+\subsection{Inversion of Control and the ApplicationContext}
+Inversion of Control is one of the most important ideas in the Spring Framework. In traditional object-oriented programming, classes often create and manage their own dependencies directly. This approach leads to strong coupling, reduces flexibility, and makes testing more difficult. Spring addresses this problem by transferring control of object creation and dependency management to a container.
+
+In this project, the container is represented by the Spring application context. The application context reads configuration metadata, instantiates beans, manages their lifecycle, and injects dependencies where required. As a result, application classes can focus on business responsibility rather than manual wiring.
+
+\subsection{Dependency Injection}
+Dependency Injection is the concrete mechanism through which IoC is realized. Instead of a service class creating a DAO object by itself, the container provides the DAO to the service. In this project, constructor injection is used in the service layer. This approach improves readability, makes dependencies explicit, and encourages loose coupling.
+
+\subsection{Beans and Configuration Styles}
+In Spring, a bean is an object managed by the container. Beans may be defined in multiple ways. Two common approaches are:
+\begin{itemize}
+    \item XML-based configuration, where beans are declared in a configuration file.
+    \item Annotation-based configuration, where classes are marked with annotations such as \texttt{@Component} and dependencies are injected with annotations such as \texttt{@Autowired}.
+\end{itemize}
+
+This experiment intentionally combines both styles. The \texttt{UserDaoImpl} bean is configured in \texttt{applicationContext.xml}, while \texttt{UserService} and \texttt{HomeController} are managed through annotation scanning. This mixed approach is appropriate for educational purposes because it shows that different Spring configuration methods can work together in one application context.
+
+\section{System Design}
+
+\subsection{Overall Architecture}
+The experiment follows a simple layered architecture. The principal components are listed below:
+\begin{itemize}
+    \item \texttt{User}: a plain Java object representing the user domain model.
+    \item \texttt{UserDao}: an interface representing the data access abstraction.
+    \item \texttt{UserDaoImpl}: an XML-managed implementation that returns sample in-memory data.
+    \item \texttt{UserService}: an annotation-managed service that receives the DAO through constructor injection.
+    \item \texttt{HomeController}: a Spring MVC controller that prepares data for the page.
+    \item \texttt{index.html}: a Thymeleaf template that renders the experimental results in the browser.
+\end{itemize}
+
+\subsection{Textual Architecture Description}
+The functional interaction of the system can be described as follows:
+\begin{quote}
+Browser request $\rightarrow$ \texttt{HomeController} $\rightarrow$ \texttt{UserService} $\rightarrow$ \texttt{UserDao} $\rightarrow$ \texttt{UserDaoImpl} $\rightarrow$ \texttt{User} data $\rightarrow$ Thymeleaf page rendering
+\end{quote}
+
+At the configuration level, the dependency flow is:
+\begin{quote}
+\texttt{applicationContext.xml} defines \texttt{userDao} $\rightarrow$ Spring container instantiates DAO bean $\rightarrow$ \texttt{UserService} receives \texttt{UserDao} through \texttt{@Autowired} constructor injection $\rightarrow$ \texttt{HomeController} uses the service and DAO to produce the final page content
+\end{quote}
+
+\subsection{Responsibility of Each Layer}
+The model layer stores the user data structure, the DAO layer abstracts data access, the service layer provides business logic, and the controller layer connects the backend logic to the web view. This separation of concerns keeps the project small but structurally meaningful for academic analysis.
+
+\section{Key Implementation}
+
+\subsection{Maven Dependency Setup}
+The project is built with Maven. The \texttt{pom.xml} file includes:
+\begin{itemize}
+    \item \texttt{spring-boot-starter-web} for Spring MVC and the embedded web server,
+    \item \texttt{spring-boot-starter-thymeleaf} for server-side page rendering,
+    \item \texttt{spring-context} to emphasize Spring container concepts,
+    \item \texttt{spring-boot-starter-test} for integration and bean verification tests.
+\end{itemize}
+
+The build configuration targets Java 17 and uses the Spring Boot Maven plugin so the application can be packaged and executed conveniently.
+
+\subsection{XML Bean Configuration}
+The XML configuration file defines the DAO bean and enables component scanning for the service and controller packages. A selective excerpt is shown in Listing~\ref{lst:xml-config}.
+
+\begin{lstlisting}[style=xmlstyle, caption={Selective excerpt from applicationContext.xml}, label={lst:xml-config}]
+<bean id="userDao" class="com.example.chapter01.dao.UserDaoImpl"/>
+
+<context:component-scan
+    base-package="com.example.chapter01.service,
+                  com.example.chapter01.controller"/>
+\end{lstlisting}
+
+This configuration is important because it demonstrates that the \texttt{UserDaoImpl} instance is not created by direct Java code. Instead, Spring reads the XML metadata, creates the bean, and stores it inside the container.
+
+\subsection{Constructor Injection in the Service Layer}
+The service layer is managed through annotations. Listing~\ref{lst:user-service} shows the key injection logic.
+
+\begin{lstlisting}[style=javastyle, caption={Selective excerpt from UserService}, label={lst:user-service}]
+@Component
+public class UserService {
+
+    private final UserDao userDao;
+
+    @Autowired
+    public UserService(UserDao userDao) {
+        this.userDao = userDao;
+    }
+
+    public String getWelcomeMessage(int userId) {
+        User user = userDao.findUserById(userId);
+        return "Welcome to Spring, " + user.getName() + "!";
+    }
+}
+\end{lstlisting}
+
+This excerpt illustrates the academic core of the experiment: the service depends on the \texttt{UserDao} abstraction rather than the concrete implementation. The actual implementation is provided by the Spring container.
+
+\subsection{Web Layer and Request Processing}
+The browser entry point is the root URL \texttt{/}. The controller prepares the values that are later rendered on the Thymeleaf page. Listing~\ref{lst:controller} presents the relevant logic.
+
+\begin{lstlisting}[style=javastyle, caption={Selective excerpt from HomeController}, label={lst:controller}]
+@Controller
+public class HomeController {
+
+    private final UserService userService;
+    private final UserDao userDao;
+
+    @GetMapping("/")
+    public String showHomePage(Model model) {
+        User xmlManagedUser = userDao.findUserById(1);
+        model.addAttribute("pageTitle", "Spring IoC and DI Demo");
+        model.addAttribute("xmlBeanResult", xmlManagedUser);
+        model.addAttribute("serviceMessage",
+                           userService.getWelcomeMessage(1));
+        return "index";
+    }
+}
+\end{lstlisting}
+
+The controller proves that XML-managed and annotation-managed beans can coexist and be consumed in the same request cycle. The Thymeleaf page displays both outputs: the direct XML bean result and the service-generated message.
+
+\section{Experimental Results and Verification}
+
+\subsection{Observed Runtime Result}
+After the application starts, the embedded Tomcat server listens on port 8000. When the user accesses \texttt{http://localhost:8000/}, the browser displays a page titled \texttt{Spring IoC and DI Demo}. The interface includes:
+\begin{itemize}
+    \item a visible label for the XML bean result,
+    \item a visible label for the autowired service result,
+    \item the rendered user data,
+    \item the message \texttt{Welcome to Spring, Ada Lovelace!}
+\end{itemize}
+
+These outputs verify that the controller, service, DAO, template engine, and application context are cooperating correctly.
+
+\subsection{Verification Summary}
+Table~\ref{tab:verification} summarizes the important verification items for this experiment.
+
+\begin{table}[H]
+    \centering
+    \caption{Verification Results}
+    \label{tab:verification}
+    \begin{tabular}{>{\raggedright\arraybackslash}p{4.2cm} >{\raggedright\arraybackslash}p{4.6cm} >{\raggedright\arraybackslash}p{3.4cm} >{\raggedright\arraybackslash}p{2cm}}
+        \toprule
+        Verification Item & Expected Result & Actual Result & Status \\
+        \midrule
+        Spring context loading & Application context starts without bean errors & Context started successfully & Passed \\
+        XML bean creation & \texttt{userDao} is created from XML & DAO bean available in container & Passed \\
+        Annotation-based injection & \texttt{UserService} receives \texttt{UserDao} & Constructor injection works correctly & Passed \\
+        HTTP page rendering & Root URL returns the Thymeleaf page & Browser page returned successfully & Passed \\
+        UI content verification & Page shows XML and autowired results & Expected text rendered on page & Passed \\
+        Automated test execution & Integration and bean tests pass & 2 tests passed, 0 failures & Passed \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\subsection{Interpretation of Results}
+The results confirm that the project fulfills the experimental objective. The Spring container is capable of managing beans declared through different configuration styles, and the application demonstrates the expected behavior consistently. The test suite provides additional evidence that the IoC container, dependency injection mechanism, and web rendering pipeline are functioning correctly.
+
+\section{Analysis and Discussion}
+This experiment demonstrates several important strengths of the Spring Framework. First, object management is clearly separated from business logic. Second, constructor injection makes dependencies explicit and improves code readability. Third, using the interface \texttt{UserDao} decouples the service layer from a concrete implementation, which improves extensibility.
+
+The experiment is also valuable from an educational perspective because it combines two common Spring configuration styles in one project. Beginners can directly observe how an XML-managed bean can be injected into an annotation-managed service and then exposed through a controller. This design makes the concept of IoC more concrete than a purely theoretical explanation.
+
+At the same time, the project has clear limitations. The data source is in-memory and does not involve a database. The application contains only one page and a small number of classes. In addition, the UI is primarily demonstrative and does not include advanced web interaction. These limitations are acceptable because the experiment is intended to focus on Spring fundamentals rather than production-scale functionality.
+
+\section{Conclusion}
+This experiment successfully implemented and verified a Spring introductory project centered on IoC, bean configuration, and dependency injection. The system showed that Spring can manage object creation through an application context, inject dependencies through constructor-based autowiring, and allow XML-based and annotation-based configuration to coexist in one application. By combining backend wiring with a browser-accessible result page, the project provided a clear and observable demonstration of the core Spring ideas. Overall, the experiment established a solid foundation for further study of Spring MVC, persistence integration, and more advanced enterprise application development.
+
+\section{References}
+\begin{thebibliography}{9}
+    \bibitem{ref-pom}
+    Project source file, \texttt{pom.xml}, chapter01-spring-intro project root.
+
+    \bibitem{ref-xml}
+    Project source file, \texttt{src/main/resources/applicationContext.xml}, XML bean configuration and component scanning.
+
+    \bibitem{ref-service}
+    Project source file, \texttt{src/main/java/com/example/chapter01/service/UserService.java}, service-layer dependency injection logic.
+
+    \bibitem{ref-controller}
+    Project source file, \texttt{src/main/java/com/example/chapter01/controller/HomeController.java}, Spring MVC request handling and page rendering.
+
+    \bibitem{ref-test}
+    Project source file, \texttt{src/test/java/com/example/chapter01/SpringIntroApplicationTest.java}, automated verification of container wiring and page output.
+\end{thebibliography}
+
+\end{document}

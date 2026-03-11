@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    This XML file is Spring's traditional configuration style.
+    It tells the IoC container which beans to create and which packages
+    should be scanned for annotation-based components.
+-->
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="
+           http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+           http://www.springframework.org/schema/context https://www.springframework.org/schema/context/spring-context.xsd">
+
+    <!--
+        This bean is created from XML configuration.
+        Spring will instantiate UserDaoImpl and store it in the container
+        under the id "userDao".
+    -->
+    <bean id="userDao" class="com.example.chapter01.dao.UserDaoImpl"/>
+
+    <!--
+        Component scanning tells Spring to search these packages for classes
+        annotated with stereotypes such as @Component and @Controller.
+        We scan only the service and controller packages so the main
+        application configuration class is not registered twice.
+    -->
+    <context:component-scan base-package="com.example.chapter01.service,com.example.chapter01.controller"/>
+</beans>

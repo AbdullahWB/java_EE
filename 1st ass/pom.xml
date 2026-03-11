@@ -1,0 +1,112 @@
+<!--
+    This is the Maven build file for the beginner Spring project.
+    Maven uses this file to download libraries, compile the code, run tests,
+    and start the application from the command line.
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <!-- The model version is required by Maven and is almost always 4.0.0. -->
+    <modelVersion>4.0.0</modelVersion>
+
+    <!--
+        Spring Boot's parent POM supplies sensible plugin defaults
+        and manages compatible versions of Spring libraries for us.
+    -->
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.5.9</version>
+        <relativePath/>
+    </parent>
+
+    <!-- These values uniquely identify this project. -->
+    <groupId>com.example</groupId>
+    <artifactId>chapter01-spring-intro</artifactId>
+    <version>1.0-SNAPSHOT</version>
+
+    <!--
+        Properties let us reuse common values in one place.
+        This keeps the file easier to maintain and read.
+    -->
+    <properties>
+        <!-- Java 17 is required because Spring Framework 6 runs on Java 17+. -->
+        <maven.compiler.release>17</maven.compiler.release>
+
+        <!-- This improves compiler output consistency. -->
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <dependencies>
+        <!--
+            spring-boot-starter-web gives us an embedded web server,
+            Spring MVC, and the core Spring container classes underneath.
+        -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+
+        <!--
+            Thymeleaf is a server-side template engine.
+            It lets us render a simple HTML page so the user can see a UI.
+        -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-thymeleaf</artifactId>
+        </dependency>
+
+        <!--
+            We keep spring-context explicitly listed because this chapter is about
+            the IoC container, ApplicationContext, beans, and dependency injection.
+        -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+        </dependency>
+
+        <!--
+            spring-boot-starter-test includes JUnit 5 and Spring's test support.
+            The "test" scope means it is used only when running tests.
+        -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!--
+                The compiler plugin tells Maven to compile the code as Java 17.
+                This keeps the compiled bytecode compatible with our chosen JDK.
+            -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <release>${maven.compiler.release}</release>
+                </configuration>
+            </plugin>
+
+            <!--
+                The Surefire plugin runs unit tests during "mvn test".
+            -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+            </plugin>
+
+            <!--
+                The Spring Boot plugin lets us run the web app with:
+                mvn spring-boot:run
+            -->
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+</project>

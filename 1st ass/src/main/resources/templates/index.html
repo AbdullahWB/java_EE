@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${pageTitle}">Spring IoC and DI Demo</title>
+    <link rel="stylesheet" th:href="@{/css/site.css}">
+</head>
+<body>
+<div class="page-shell">
+    <main class="page">
+        <header class="hero surface reveal">
+            <div class="hero-copy">
+                <p class="eyebrow">Chapter 1 Spring Demo</p>
+                <h1 th:text="${pageTitle}">Spring IoC and DI Demo</h1>
+                <p class="hero-text">
+                    Learn how Spring wires objects together through the IoC container without forcing your classes
+                    to create their own dependencies.
+                </p>
+                <p class="hero-text" th:text="${explanation}">
+                    The DAO bean comes from XML, while the service and controller come from annotations.
+                </p>
+
+                <div class="hero-highlights">
+                    <span class="pill">XML Configuration</span>
+                    <span class="pill">Annotation Configuration</span>
+                    <span class="pill">Dependency Injection</span>
+                </div>
+            </div>
+
+            <!-- This panel turns the concept into a fast visual summary for a beginner. -->
+            <aside class="hero-panel">
+                <p class="panel-label">What you are seeing</p>
+                <div class="panel-stat">
+                    <span class="panel-stat-value">1</span>
+                    <span class="panel-stat-text">Spring container combining XML and annotations</span>
+                </div>
+                <div class="panel-note">
+                    <strong>Goal:</strong> understand how a bean defined in <code>applicationContext.xml</code>
+                    can be injected into a class discovered by <code>@Component</code>.
+                </div>
+            </aside>
+        </header>
+
+        <section class="workflow-grid">
+            <section class="surface reveal section-card">
+                <div class="section-heading">
+                    <p class="section-kicker">How It Works</p>
+                    <h2>Spring wiring in four simple steps</h2>
+                </div>
+
+                <div class="flow">
+                    <article class="flow-step">
+                        <span class="flow-number">01</span>
+                        <h3>XML registers the DAO bean</h3>
+                        <p><code>applicationContext.xml</code> tells Spring to create <code>userDao</code>.</p>
+                    </article>
+
+                    <article class="flow-step">
+                        <span class="flow-number">02</span>
+                        <h3>The container manages the objects</h3>
+                        <p>Spring stores beans and decides how dependencies should be connected.</p>
+                    </article>
+
+                    <article class="flow-step">
+                        <span class="flow-number">03</span>
+                        <h3>The service receives the DAO</h3>
+                        <p><code>UserService</code> gets <code>UserDao</code> through constructor injection.</p>
+                    </article>
+
+                    <article class="flow-step">
+                        <span class="flow-number">04</span>
+                        <h3>The browser shows the final result</h3>
+                        <p>The controller reads the service output and renders this page with Thymeleaf.</p>
+                    </article>
+                </div>
+            </section>
+
+            <section class="surface reveal section-card reference-card">
+                <div class="section-heading">
+                    <p class="section-kicker">Study Guide</p>
+                    <h2>Key parts of the project</h2>
+                </div>
+
+                <ul class="reference-list">
+                    <li><code>applicationContext.xml</code> defines the XML-managed bean.</li>
+                    <li><code>UserDaoImpl</code> supplies sample user data.</li>
+                    <li><code>UserService</code> shows annotation-based dependency injection.</li>
+                    <li><code>HomeController</code> prepares the data for the browser.</li>
+                </ul>
+            </section>
+        </section>
+
+        <section class="results-section">
+            <div class="section-heading reveal">
+                <p class="section-kicker">Live Results</p>
+                <h2>See both configuration styles working together</h2>
+            </div>
+
+            <div class="results-grid">
+                <!-- This card highlights the bean that comes from XML configuration. -->
+                <article class="surface reveal result-card result-card-xml">
+                    <div class="result-header">
+                        <p class="result-type">XML Configuration</p>
+                        <h3>XML bean result:</h3>
+                    </div>
+                    <p class="result-description">
+                        This value comes from the DAO bean created through the traditional Spring XML file.
+                    </p>
+                    <div class="result-output" th:text="${xmlBeanResult}">
+                        User{id=1, name='Ada Lovelace'}
+                    </div>
+                </article>
+
+                <!-- This card highlights the service that uses annotation-based injection. -->
+                <article class="surface reveal result-card result-card-annotation">
+                    <div class="result-header">
+                        <p class="result-type">Annotation Configuration</p>
+                        <h3>Autowired service result:</h3>
+                    </div>
+                    <p class="result-description">
+                        This message is produced by <code>UserService</code> after Spring injects the DAO into it.
+                    </p>
+                    <div class="result-output" th:text="${serviceMessage}">
+                        Welcome to Spring, Ada Lovelace!
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <footer class="surface reveal footer-card">
+            <div>
+                <p class="section-kicker">Why This Matters</p>
+                <h2>Loose coupling makes code easier to test and maintain</h2>
+            </div>
+            <p class="footer-text">
+                Instead of creating dependencies manually, each class focuses on its own responsibility and lets
+                Spring handle the object lifecycle. That is the core idea behind IoC and dependency injection.
+            </p>
+        </footer>
+    </main>
+</div>
+</body>
+</html>
