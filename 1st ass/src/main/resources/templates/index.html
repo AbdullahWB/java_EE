@@ -9,6 +9,20 @@
 <body>
 <div class="page-shell">
     <main class="page">
+        <section class="topbar reveal">
+            <div class="topbar-brand">
+                <span class="topbar-mark">S</span>
+                <div>
+                    <p class="topbar-label">Spring Learning Lab</p>
+                    <p class="topbar-subtitle">IoC container and dependency injection demonstration</p>
+                </div>
+            </div>
+            <div class="topbar-meta">
+                <span class="topbar-badge">Port 8000</span>
+                <span class="topbar-badge">Thymeleaf UI</span>
+            </div>
+        </section>
+
         <header class="hero surface reveal">
             <div class="hero-copy">
                 <p class="eyebrow">Chapter 1 Spring Demo</p>
@@ -25,6 +39,21 @@
                     <span class="pill">XML Configuration</span>
                     <span class="pill">Annotation Configuration</span>
                     <span class="pill">Dependency Injection</span>
+                </div>
+
+                <div class="hero-metrics">
+                    <article class="metric-chip">
+                        <span class="metric-value">2</span>
+                        <span class="metric-label">Configuration styles</span>
+                    </article>
+                    <article class="metric-chip">
+                        <span class="metric-value">1</span>
+                        <span class="metric-label">Shared Spring container</span>
+                    </article>
+                    <article class="metric-chip">
+                        <span class="metric-value">/</span>
+                        <span class="metric-label">Root route for live demo</span>
+                    </article>
                 </div>
             </div>
 
@@ -110,6 +139,7 @@
                     <div class="result-output" th:text="${xmlBeanResult}">
                         User{id=1, name='Ada Lovelace'}
                     </div>
+                    <p class="result-note">Source: bean id <code>userDao</code> from the XML application context.</p>
                 </article>
 
                 <!-- This card highlights the service that uses annotation-based injection. -->
@@ -124,6 +154,7 @@
                     <div class="result-output" th:text="${serviceMessage}">
                         Welcome to Spring, Ada Lovelace!
                     </div>
+                    <p class="result-note">Source: <code>UserService</code> after Spring injects the DAO dependency.</p>
                 </article>
             </div>
         </section>
