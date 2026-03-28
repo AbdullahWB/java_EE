@@ -1,0 +1,223 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{titlesec}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    urlcolor=blue
+}
+
+\titleformat{\section}{\large\bfseries}{\thesection.}{0.5em}{}
+\titleformat{\subsection}{\normalsize\bfseries}{\thesubsection.}{0.5em}{}
+
+\lstset{
+    basicstyle=\ttfamily\small,
+    breaklines=true,
+    frame=single,
+    backgroundcolor=\color{gray!8},
+    columns=fullflexible
+}
+
+\title{\textbf{Bean Management in Spring}\\[4pt]\large Assignment Report}
+\author{Student Submission}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{Overview}
+This report presents the implementation of the Maven project \texttt{chapter02\_assignment} for the topic \textbf{Management of Beans in Spring}. The solution uses annotation-based configuration with Spring components, service and repository layers, and bean lifecycle management.
+
+\section{Project Objective}
+The assignment required the following:
+\begin{itemize}
+    \item Create a Maven project named \texttt{chapter02\_assignment}.
+    \item Implement \texttt{StudentDao} using \texttt{@Repository}.
+    \item Implement \texttt{StudentService} using \texttt{@Service} and inject \texttt{StudentDao} with \texttt{@Autowired}.
+    \item Implement \texttt{CourseInfo} using \texttt{@Component}, lifecycle annotations, and bean scope testing.
+    \item Create \texttt{AppConfig} using Java configuration and component scanning.
+    \item Create \texttt{SpringApp} to initialize the Spring container and test bean behavior.
+\end{itemize}
+
+\section{Project Structure}
+\begin{lstlisting}
+chapter02_assignment
+|-- pom.xml
+|-- src
+    |-- main
+        |-- java
+            |-- com.example.chapter02
+                |-- SpringApp.java
+                |-- component
+                |   |-- CourseInfo.java
+                |-- config
+                |   |-- AppConfig.java
+                |-- dao
+                |   |-- StudentDao.java
+                |-- service
+                    |-- StudentService.java
+\end{lstlisting}
+
+\section{Implementation Details}
+
+\subsection{StudentDao}
+The \texttt{StudentDao} class is annotated with \texttt{@Repository}. It provides the method \texttt{saveStudent()} which prints a success message when student data is saved.
+
+\begin{lstlisting}[language=Java]
+@Repository
+public class StudentDao {
+    public void saveStudent() {
+        System.out.println("StudentDao: student information saved successfully.");
+    }
+}
+\end{lstlisting}
+
+\subsection{StudentService}
+The \texttt{StudentService} class is annotated with \texttt{@Service}. It uses \texttt{@Autowired} to inject \texttt{StudentDao}. The method \texttt{registerStudent()} prints a registration message and then calls \texttt{studentDao.saveStudent()}.
+
+\begin{lstlisting}[language=Java]
+@Service
+public class StudentService {
+
+    @Autowired
+    private StudentDao studentDao;
+
+    public void registerStudent() {
+        System.out.println("StudentService: registering student...");
+        studentDao.saveStudent();
+    }
+}
+\end{lstlisting}
+
+\subsection{CourseInfo}
+The \texttt{CourseInfo} bean is annotated with \texttt{@Component}. It demonstrates:
+\begin{itemize}
+    \item constructor execution,
+    \item initialization with \texttt{@PostConstruct},
+    \item destruction with \texttt{@PreDestroy},
+    \item bean scope testing using \texttt{@Scope("singleton")} and later \texttt{@Scope("prototype")}.
+\end{itemize}
+
+\begin{lstlisting}[language=Java]
+@Component
+@Scope("singleton")
+public class CourseInfo {
+
+    private String courseName = "Spring Framework Basics";
+
+    public CourseInfo() {
+        System.out.println("CourseInfo constructor called.");
+    }
+
+    @PostConstruct
+    public void init() {
+        System.out.println("CourseInfo initialized.");
+    }
+
+    @PreDestroy
+    public void destroy() {
+        System.out.println("CourseInfo destroyed.");
+    }
+
+    public String getCourseName() {
+        return courseName;
+    }
+}
+\end{lstlisting}
+
+\subsection{AppConfig}
+The configuration class uses annotation-based component scanning:
+
+\begin{lstlisting}[language=Java]
+@Configuration
+@ComponentScan("com.example.chapter02")
+public class AppConfig {
+}
+\end{lstlisting}
+
+\subsection{SpringApp}
+The main class initializes the Spring container, retrieves beans, checks the scope behavior, prints the course name, and finally closes the container.
+
+\begin{lstlisting}[language=Java]
+public class SpringApp {
+    public static void main(String[] args) {
+        AnnotationConfigApplicationContext context =
+                new AnnotationConfigApplicationContext(AppConfig.class);
+
+        StudentService studentService = context.getBean(StudentService.class);
+        studentService.registerStudent();
+
+        CourseInfo course1 = context.getBean(CourseInfo.class);
+        CourseInfo course2 = context.getBean(CourseInfo.class);
+
+        System.out.println("course1 == course2 : " + (course1 == course2));
+        System.out.println(course1.getCourseName());
+
+        context.close();
+    }
+}
+\end{lstlisting}
+
+\section{Observed Output}
+The application was executed successfully with \texttt{@Scope("singleton")}. The terminal output was:
+
+\begin{lstlisting}
+CourseInfo constructor called.
+CourseInfo initialized.
+StudentService: registering student...
+StudentDao: student information saved successfully.
+course1 == course2 : true
+Spring Framework Basics
+CourseInfo destroyed.
+\end{lstlisting}
+
+\section{Scope Test Analysis}
+\subsection{Singleton Scope}
+When \texttt{@Scope("singleton")} is used:
+\begin{itemize}
+    \item only one object of \texttt{CourseInfo} is created,
+    \item both \texttt{course1} and \texttt{course2} refer to the same object,
+    \item therefore the output is:
+\end{itemize}
+
+\begin{lstlisting}
+course1 == course2 : true
+\end{lstlisting}
+
+\subsection{Prototype Scope}
+When \texttt{@Scope("prototype")} is used:
+\begin{itemize}
+    \item a new object is created every time the bean is requested,
+    \item \texttt{course1} and \texttt{course2} become different objects,
+    \item therefore the output changes to:
+\end{itemize}
+
+\begin{lstlisting}
+course1 == course2 : false
+\end{lstlisting}
+
+\section{Screenshots}
+Figure~\ref{fig:output} is intended for the terminal output screenshot provided with the assignment evidence.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{output-screenshot.png}
+    \caption{Terminal output of the Spring application execution}
+    \label{fig:output}
+\end{figure}
+
+\noindent\textbf{Note:} Save the screenshot you shared as \texttt{output-screenshot.png} in the same folder as \texttt{percent.tex} before compiling the report.
+
+\section{Conclusion}
+The assignment was completed successfully using annotation-based bean configuration in Spring. The implementation demonstrates repository and service bean management, dependency injection with \texttt{@Autowired}, bean lifecycle methods with \texttt{@PostConstruct} and \texttt{@PreDestroy}, and scope behavior testing with singleton and prototype beans.
+
+\end{document}

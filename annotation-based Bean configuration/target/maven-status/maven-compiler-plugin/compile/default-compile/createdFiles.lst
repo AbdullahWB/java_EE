@@ -1,0 +1,5 @@
+com\example\chapter02\config\AppConfig.class
+com\example\chapter02\dao\StudentDao.class
+com\example\chapter02\SpringApp.class
+com\example\chapter02\component\CourseInfo.class
+com\example\chapter02\service\StudentService.class
