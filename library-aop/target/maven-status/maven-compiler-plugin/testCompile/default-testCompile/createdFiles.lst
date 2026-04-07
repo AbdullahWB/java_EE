@@ -1,0 +1,3 @@
+com\example\library\test\CglibProxyTest.class
+com\example\library\test\SpringAnnotationAopTest.class
+com\example\library\test\JdkProxyTest.class

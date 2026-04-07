@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:aop="http://www.springframework.org/schema/aop"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans https://www.springframework.org/schema/beans/spring-beans.xsd
+                        http://www.springframework.org/schema/aop https://www.springframework.org/schema/aop/spring-aop.xsd">
+
+    <bean id="bookDao" class="com.example.library.dao.BookDaoImpl" />
+    <bean id="libraryAdvice" class="com.example.library.aspect.LibraryAdvice" />
+
+    <aop:config>
+        <aop:pointcut id="bookDaoMethods"
+            expression="execution(* com.example.library.dao.BookDaoImpl.*(..))" />
+
+        <aop:aspect ref="libraryAdvice">
+            <aop:before method="checkPermission" pointcut-ref="bookDaoMethods" />
+            <aop:after-returning method="writeLog" pointcut-ref="bookDaoMethods" />
+            <aop:after-throwing method="handleException"
+                pointcut-ref="bookDaoMethods"
+                throwing="ex" />
+        </aop:aspect>
+    </aop:config>
+
+</beans>
