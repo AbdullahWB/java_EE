@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:aop="http://www.springframework.org/schema/aop"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+                        http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+    <bean id="bookDao" class="com.example.library.dao.BookDaoImpl" />
+    <bean id="xmlLibraryAdvice" class="com.example.library.advice.XmlLibraryAdvice" />
+
+    <aop:config>
+        <aop:pointcut id="libraryOperation"
+            expression="execution(* com.example.library.dao.*.*(..))" />
+
+        <aop:aspect id="libraryAspect" ref="xmlLibraryAdvice">
+            <aop:before method="beforeAdvice" pointcut-ref="libraryOperation" />
+            <aop:after-returning method="afterReturningAdvice" pointcut-ref="libraryOperation" />
+            <aop:after-throwing method="afterThrowingAdvice" pointcut-ref="libraryOperation" throwing="e" />
+        </aop:aspect>
+    </aop:config>
+
+</beans>
