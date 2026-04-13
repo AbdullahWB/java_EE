@@ -1,0 +1,139 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{setspace}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{enumitem}
+\usepackage{hyperref}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=black,
+    urlcolor=blue
+}
+
+\setstretch{1.15}
+\setlength{\parskip}{6pt}
+\setlength{\parindent}{0pt}
+
+\newcommand{\outputfigure}[3]{
+\begin{figure}[H]
+\centering
+\IfFileExists{#1}{
+    \includegraphics[width=0.9\textwidth]{#1}
+}{
+    \fbox{
+        \parbox[c][2in][c]{0.85\textwidth}{
+            \centering
+            Insert the screenshot of #2 here\\
+            Suggested file: \texttt{#1}
+        }
+    }
+}
+\caption{#3}
+\end{figure}
+}
+
+\title{\textbf{Project Report}\\Aspect-Oriented Programming in a Library Management System}
+\author{Student Name: \underline{\hspace{2.4in}}}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section*{Abstract}
+This project presents the implementation of Aspect-Oriented Programming (AOP) in a simple Library Management System using Java and Spring Framework. The main purpose of the work is to separate cross-cutting concerns such as permission checking, logging, and exception handling from the core business logic. Four approaches were implemented and tested: JDK Dynamic Proxy, CGLIB Proxy, XML-based Spring AOP, and Annotation-based Spring AOP. The project shows how each technique improves modularity, maintainability, and code reuse.
+
+\section*{Introduction}
+In conventional object-oriented programming, concerns like logging, authorization, and error handling are often repeated in multiple classes. This repetition increases code duplication and reduces maintainability. Aspect-Oriented Programming addresses this problem by moving such cross-cutting concerns into separate advice classes. In this project, a library management example was developed to demonstrate how AOP can be applied in different ways in Java applications.
+
+\section*{Objectives}
+The objectives of this project are listed below:
+\begin{enumerate}[label=\arabic*.]
+    \item To design a simple library system with basic operations.
+    \item To implement AOP using JDK Dynamic Proxy for interface-based interception.
+    \item To implement AOP using CGLIB Proxy for class-based interception.
+    \item To configure and test XML-based AOP using Spring.
+    \item To configure and test Annotation-based AOP using Spring.
+    \item To compare the outputs of all four test implementations.
+\end{enumerate}
+
+\section*{Project Structure}
+The project is organized into multiple packages, each with a clear responsibility:
+\begin{itemize}
+    \item \texttt{dao}: Contains the data access interface and implementation for library book operations.
+    \item \texttt{admin}: Contains administrative operations for opening and closing the library.
+    \item \texttt{advice}: Contains advice classes responsible for logging, permission checking, and exception handling.
+    \item \texttt{proxy}: Contains manual proxy implementations for JDK Proxy and CGLIB Proxy.
+    \item \texttt{test}: Contains the test classes used to execute and verify each AOP approach.
+\end{itemize}
+
+\section*{Configuration Files Used}
+The following configuration files are used in the project:
+\begin{itemize}
+    \item \texttt{pom.xml}: Manages Maven build settings and project dependencies.
+    \item \texttt{applicationContext.xml}: Provides Spring XML bean configuration and XML-based AOP setup.
+    \item \texttt{applicationContext-anno.xml}: Enables component scanning and annotation-based AOP support.
+\end{itemize}
+
+\section*{Step-by-Step Implementation}
+The project was completed through the following steps:
+
+\begin{enumerate}[label=\arabic*.]
+    \item A basic library module was created using \texttt{BookDao}, \texttt{BookDaoImpl}, and \texttt{LibraryAdmin}. These classes represent the business layer of the application.
+    \item Separate advice classes were written to handle permission validation, execution logging, and exception reporting. This ensured that cross-cutting concerns remained outside the business classes.
+    \item A JDK Dynamic Proxy was implemented for \texttt{BookDaoImpl}, since it works through interfaces. The proxy intercepts method calls and applies advice before and after execution.
+    \item A CGLIB Proxy was implemented for \texttt{LibraryAdmin}. This approach was selected because CGLIB can create proxies for concrete classes even when an interface is not available.
+    \item XML-based AOP was configured in Spring by defining beans, pointcuts, and advice methods inside \texttt{applicationContext.xml}. This allowed declarative AOP without changing the target business code.
+    \item Annotation-based AOP was configured using \texttt{@Aspect}, \texttt{@Before}, \texttt{@AfterReturning}, and \texttt{@AfterThrowing}. Spring component scanning and automatic proxy creation were enabled in \texttt{applicationContext-anno.xml}.
+    \item Four test classes were used to execute the implemented features and verify the correctness of all AOP techniques through console output.
+\end{enumerate}
+
+\section*{Test Classes}
+The following test classes were used in the project:
+\begin{itemize}
+    \item \texttt{JdkTest.java}
+    \item \texttt{CglibTest.java}
+    \item \texttt{XmlAopTest.java}
+    \item \texttt{AnnoAopTest.java}
+\end{itemize}
+
+\section*{Results and Output Discussion}
+The outputs of the test classes confirm that AOP was applied correctly in all four implementations. In each case, the advice methods were executed before or after the business methods, and exception handling was demonstrated during the delete or remove operation. This confirms that cross-cutting concerns were successfully separated from the main application logic.
+
+\subsection*{Figure 1: Output of JDK Dynamic Proxy Test}
+\outputfigure{figures/jdktest-output.png}{JdkTest.java}{Console output of \texttt{JdkTest.java}}
+
+This result shows that the JDK proxy intercepted interface-based method calls and executed permission checking and logging before invoking the original method. It also handled the exception during the delete operation.
+
+\subsection*{Figure 2: Output of CGLIB Proxy Test}
+\outputfigure{figures/cglibtest-output.png}{CglibTest.java}{Console output of \texttt{CglibTest.java}}
+
+This result demonstrates that CGLIB successfully created a subclass-based proxy for the administrative class. The proxy applied advice around class methods without requiring an interface.
+
+\subsection*{Figure 3: Output of XML-Based AOP Test}
+\outputfigure{figures/xmlaoptest-output.png}{XmlAopTest.java}{Console output of \texttt{XmlAopTest.java}}
+
+This result confirms that Spring XML configuration correctly applied before advice, after-returning advice, and after-throwing advice to the target DAO methods. It illustrates declarative AOP configuration through XML.
+
+\subsection*{Figure 4: Output of Annotation-Based AOP Test}
+\outputfigure{figures/annoaoptest-output.png}{AnnoAopTest.java}{Console output of \texttt{AnnoAopTest.java}}
+
+This result verifies that annotation-based AOP worked correctly using aspect annotations. Spring automatically detected the aspect class and applied the advice to the matching methods.
+
+\section*{Conclusion}
+This project successfully implemented Aspect-Oriented Programming in a Library Management System using four different approaches. JDK Dynamic Proxy and CGLIB Proxy demonstrated manual proxy creation, while XML-based and Annotation-based Spring AOP demonstrated framework-supported AOP configuration. The project clearly shows that AOP improves software structure by separating repeated concerns from business logic. As a result, the code becomes cleaner, more modular, and easier to maintain.
+
+\section*{References}
+\begin{enumerate}[label=\arabic*.]
+    \item Spring Framework Documentation.
+    \item Java Reflection and Proxy API Documentation.
+    \item Aspect-Oriented Programming concepts in enterprise Java applications.
+\end{enumerate}
+
+\end{document}
