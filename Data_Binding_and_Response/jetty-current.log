@@ -1,0 +1,54 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] --------------< com.example:student-course-registration >---------------
+[INFO] Building student-course-registration 1.0-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ war ]---------------------------------
+[INFO] 
+[INFO] >>> jetty:9.4.54.v20240208:run (default-cli) > test-compile @ student-course-registration >>>
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ student-course-registration ---
+[INFO] skip non existing resourceDirectory C:\Users\abdul\Desktop\java EE\Data_Binding_and_Response\src\main\resources
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ student-course-registration ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ student-course-registration ---
+[INFO] skip non existing resourceDirectory C:\Users\abdul\Desktop\java EE\Data_Binding_and_Response\src\test\resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ student-course-registration ---
+[INFO] No sources to compile
+[INFO] 
+[INFO] <<< jetty:9.4.54.v20240208:run (default-cli) < test-compile @ student-course-registration <<<
+[INFO] 
+[INFO] 
+[INFO] --- jetty:9.4.54.v20240208:run (default-cli) @ student-course-registration ---
+[INFO] Logging initialized @4471ms to org.eclipse.jetty.util.log.Slf4jLog
+[INFO] webAppSourceDirectory not set. Trying src\main\webapp
+[INFO] Reload Mechanic: automatic
+[INFO] nonBlocking:false
+[INFO] Classes = C:\Users\abdul\Desktop\java EE\Data_Binding_and_Response\target\classes
+[INFO] Configuring Jetty for project: student-course-registration
+[INFO] Context path = /
+[INFO] Tmp directory = C:\Users\abdul\Desktop\java EE\Data_Binding_and_Response\target\tmp
+[INFO] Web defaults = org/eclipse/jetty/webapp/webdefault.xml
+[INFO] Web overrides =  none
+[INFO] web.xml file = file:///C:/Users/abdul/Desktop/java%20EE/Data_Binding_and_Response/src/main/webapp/WEB-INF/web.xml
+[INFO] Webapp directory = C:\Users\abdul\Desktop\java EE\Data_Binding_and_Response\src\main\webapp
+[INFO] jetty-9.4.54.v20240208; built: 2024-02-08T19:42:39.027Z; git: cef3fbd6d736a21e7d541a5db490381d95a2047d; jvm 17.0.15+6
+[INFO] Scanning elapsed time=279ms
+[INFO] No Spring WebApplicationInitializer types detected on classpath
+[INFO] DefaultSessionIdManager workerName=node0
+[INFO] No SessionScavenger set, using defaults
+[INFO] node0 Scavenging every 600000ms
+[INFO] Initializing Spring DispatcherServlet 'dispatcher'
+[INFO] Initializing Servlet 'dispatcher'
+[INFO] Completed initialization in 1903 ms
+[INFO] Started o.e.j.m.p.JettyWebAppContext@38f981b6{/,file:///C:/Users/abdul/Desktop/java%20EE/Data_Binding_and_Response/src/main/webapp/,AVAILABLE}{file:///C:/Users/abdul/Desktop/java%20EE/Data_Binding_and_Response/src/main/webapp/}
+[INFO] Started ServerConnector@2aa07d80{HTTP/1.1, (http/1.1)}{0.0.0.0:8080}
+[INFO] Started @8698ms
+[INFO] Started Jetty Server
+[WARNING] No mapping for GET /favicon.ico
+Searching student: Lucy
+Student name: Tom
+Student age: 20

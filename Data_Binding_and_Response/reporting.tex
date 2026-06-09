@@ -1,0 +1,404 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage[hidelinks]{hyperref}
+
+\graphicspath{{images/}}
+
+\lstset{
+    basicstyle=\ttfamily\small,
+    breaklines=true,
+    frame=single,
+    numbers=left,
+    numberstyle=\tiny,
+    keywordstyle=\color{blue},
+    commentstyle=\color{gray},
+    stringstyle=\color{teal}
+}
+
+\newcommand{\screenshot}[3]{
+    \begin{figure}[H]
+        \centering
+        \IfFileExists{images/#1}{
+            \includegraphics[width=0.95\textwidth]{#1}
+        }{
+            \fbox{
+                \begin{minipage}[c][0.18\textheight][c]{0.9\textwidth}
+                    \centering
+                    Missing screenshot file: \texttt{images/#1}
+                \end{minipage}
+            }
+        }
+        \caption{#2}
+        \label{#3}
+    \end{figure}
+}
+
+\begin{document}
+
+\begin{titlepage}
+    \centering
+    \vspace*{2cm}
+    {\Large \textbf{Student Course Registration System}}\\[0.4cm]
+    {\large Spring MVC Data Binding and Response Experiment}\\[1.5cm]
+    {\large Academic Laboratory Report}\\[2cm]
+    \vfill
+    \begin{flushleft}
+        \textbf{Course:} Java EE / Spring MVC\\
+        \textbf{Experiment Topic:} Data Binding and Response Handling\\
+        \textbf{Project Name:} Data\_Binding\_and\_Response\\
+        \textbf{Server:} Jetty 9.4.54\\
+    \end{flushleft}
+    \vfill
+    {\large \today}
+\end{titlepage}
+
+\tableofcontents
+\newpage
+
+\section{Introduction}
+
+This experiment implements a simple Student Course Registration System using Spring MVC.
+The main purpose of the experiment is to understand how request data is received by controller
+methods and how Spring MVC returns page and JSON responses. The system allows a student to submit
+basic information, select multiple courses, and receive JSON data from the server.
+
+\section{Experiment Objectives}
+
+The objectives of this experiment are:
+
+\begin{itemize}
+    \item To practice simple parameter binding in Spring MVC.
+    \item To bind request parameters using \texttt{@RequestParam}.
+    \item To receive REST-style values using \texttt{@PathVariable}.
+    \item To bind request parameters to a Java POJO.
+    \item To bind multiple request values using a list.
+    \item To receive JSON request data using \texttt{@RequestBody}.
+    \item To return JSON response data using \texttt{@ResponseBody}.
+\end{itemize}
+
+\section{Development Environment}
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|l|l|}
+        \hline
+        \textbf{Item} & \textbf{Description} \\
+        \hline
+        Programming Language & Java \\
+        Framework & Spring MVC \\
+        Build Tool & Maven \\
+        Server & Jetty 9.4.54 \\
+        Testing Tool & Browser and Postman \\
+        Project Type & Maven WAR Web Application \\
+        \hline
+    \end{tabular}
+    \caption{Development environment}
+\end{table}
+
+\section{System Design}
+
+The application uses the Spring MVC pattern. The \texttt{StudentController} receives HTTP
+requests, binds request data to method parameters or Java objects, prints results in the server
+console, and returns either plain text, a JSP page, or JSON data.
+
+The main files developed in this experiment are:
+
+\begin{itemize}
+    \item \texttt{StudentController.java}
+    \item \texttt{Student.java}
+    \item \texttt{Course.java}
+    \item \texttt{result.jsp}
+\end{itemize}
+
+\section{Implementation}
+
+\subsection{Student Model}
+
+The \texttt{Student} class is used for POJO binding and JSON response. It contains three fields:
+\texttt{id}, \texttt{name}, and \texttt{age}.
+
+\begin{lstlisting}[caption={Student.java},label={lst:student},language=Java]
+package com.example.model;
+
+public class Student {
+    private Integer id;
+    private String name;
+    private Integer age;
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Integer getAge() {
+        return age;
+    }
+
+    public void setAge(Integer age) {
+        this.age = age;
+    }
+}
+\end{lstlisting}
+
+\subsection{Course Model}
+
+The \texttt{Course} class is used for JSON request binding. It contains \texttt{courseId},
+\texttt{courseName}, and \texttt{credit}.
+
+\begin{lstlisting}[caption={Course.java},label={lst:course},language=Java]
+package com.example.model;
+
+public class Course {
+    private Integer courseId;
+    private String courseName;
+    private Integer credit;
+
+    public Integer getCourseId() {
+        return courseId;
+    }
+
+    public void setCourseId(Integer courseId) {
+        this.courseId = courseId;
+    }
+
+    public String getCourseName() {
+        return courseName;
+    }
+
+    public void setCourseName(String courseName) {
+        this.courseName = courseName;
+    }
+
+    public Integer getCredit() {
+        return credit;
+    }
+
+    public void setCredit(Integer credit) {
+        this.credit = credit;
+    }
+}
+\end{lstlisting}
+
+\subsection{Student Controller}
+
+The \texttt{StudentController} contains all controller methods required for this experiment,
+including simple parameter binding, \texttt{@RequestParam}, \texttt{@PathVariable}, POJO binding,
+list binding, JSON request binding, and JSON response.
+
+\begin{lstlisting}[caption={StudentController.java},label={lst:controller},language=Java]
+package com.example.controller;
+
+import com.example.model.Course;
+import com.example.model.Student;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import java.util.List;
+
+@Controller
+@RequestMapping("/student")
+public class StudentController {
+
+    @GetMapping("/info")
+    @ResponseBody
+    public String info(String name, int age) {
+        System.out.println("Student name: " + name);
+        System.out.println("Student age: " + age);
+        return "Student info received";
+    }
+
+    @GetMapping("/search")
+    @ResponseBody
+    public String search(@RequestParam("studentName") String name) {
+        System.out.println("Searching student: " + name);
+        return "Search request received";
+    }
+
+    @GetMapping("/{id:\\d+}")
+    @ResponseBody
+    public String findById(@PathVariable("id") Integer id) {
+        System.out.println("Student ID: " + id);
+        return "Student ID received";
+    }
+
+    @PostMapping("/register")
+    public String register(Student student, Model model) {
+        model.addAttribute("student", student);
+        return "result";
+    }
+
+    @PostMapping("/selectCourses")
+    @ResponseBody
+    public String selectCourses(@RequestParam("courses") List<String> courses) {
+        System.out.println("Selected courses:");
+        for (String course : courses) {
+            System.out.println(course);
+        }
+        return "Courses received";
+    }
+
+    @PostMapping("/addCourse")
+    @ResponseBody
+    public String addCourse(@RequestBody Course course) {
+        System.out.println("Course ID: " + course.getCourseId());
+        System.out.println("Course Name: " + course.getCourseName());
+        System.out.println("Credit: " + course.getCredit());
+        return "Course received";
+    }
+
+    @GetMapping("/json")
+    @ResponseBody
+    public Student json() {
+        Student student = new Student();
+        student.setId(1001);
+        student.setName("Tom");
+        student.setAge(20);
+        return student;
+    }
+}
+\end{lstlisting}
+
+\subsection{Result JSP Page}
+
+The \texttt{result.jsp} page displays the result of student registration after POJO binding.
+
+\begin{lstlisting}[caption={result.jsp},label={lst:resultjsp},language=HTML]
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Registration Result</title>
+</head>
+<body>
+    <h2>Registration Successful</h2>
+
+    <p>Student ID: ${student.id}</p>
+    <p>Student Name: ${student.name}</p>
+    <p>Student Age: ${student.age}</p>
+</body>
+</html>
+\end{lstlisting}
+
+\section{Testing and Results}
+
+The project was started using the following Maven command:
+
+\begin{lstlisting}[caption={Running the application}]
+mvn jetty:run
+\end{lstlisting}
+
+After the server started successfully, the following tests were performed.
+
+\subsection{Simple Parameter Binding Test}
+
+The simple parameter binding test uses a GET request:
+
+\begin{lstlisting}
+GET http://localhost:8080/student/info?name=Tom&age=20
+\end{lstlisting}
+
+The controller receives \texttt{name} and \texttt{age} directly as method parameters and prints
+the values in the server console.
+
+\screenshot{simple-parameter-binding.png}
+{Simple parameter binding test in browser}
+{fig:simple-parameter-binding}
+
+\screenshot{simple-parameter-console.png}
+{Console output for simple parameter binding}
+{fig:simple-parameter-console}
+
+\subsection{POJO Data Binding Test}
+
+The POJO data binding test uses a POST request:
+
+\begin{lstlisting}
+POST http://localhost:8080/student/register?id=1001&name=Tom&age=20
+\end{lstlisting}
+
+Spring MVC binds the request parameters to a \texttt{Student} object. The object is added to the
+\texttt{Model}, and the request is forwarded to \texttt{result.jsp}.
+
+\screenshot{pojo-binding-register.png}
+{POJO data binding test with student registration result}
+{fig:pojo-binding-register}
+
+\subsection{Multiple Courses Binding Test}
+
+The multiple courses test uses a POST request with repeated parameter names:
+
+\begin{lstlisting}
+POST http://localhost:8080/student/selectCourses
+courses=Java
+courses=Spring MVC
+courses=MyBatis
+\end{lstlisting}
+
+Spring MVC binds the repeated \texttt{courses} parameters to a \texttt{List<String>}.
+
+\screenshot{multiple-courses-binding.png}
+{Multiple courses binding test in Postman}
+{fig:multiple-courses-binding}
+
+\screenshot{multiple-courses-console.png}
+{Console output for multiple courses binding}
+{fig:multiple-courses-console}
+
+\subsection{JSON Response Test}
+
+The JSON response test uses a GET request:
+
+\begin{lstlisting}
+GET http://localhost:8080/student/json
+\end{lstlisting}
+
+The controller returns a \texttt{Student} object with \texttt{@ResponseBody}. Spring MVC converts
+the Java object into JSON.
+
+\screenshot{json-response.png}
+{JSON response test in browser}
+{fig:json-response}
+
+\section{Discussion}
+
+The experiment shows that Spring MVC provides several convenient methods for receiving request
+data. Simple request parameters can be bound directly to method arguments. When the request
+parameter name and method parameter name are different, \texttt{@RequestParam} can be used.
+REST-style path data can be obtained using \texttt{@PathVariable}. Complex form data can be bound
+directly to a Java object, and repeated parameters can be bound to a list. JSON request and
+response handling is supported through \texttt{@RequestBody} and \texttt{@ResponseBody}.
+
+\section{Conclusion}
+
+This experiment successfully implemented the required Student Course Registration System using
+Spring MVC. The application handled simple parameter binding, POJO binding, list binding, JSON
+request binding, and JSON response generation. The screenshots show successful execution of the
+required tests, including simple parameter binding, POJO binding, multiple courses binding, and
+JSON response.
+
+\end{document}
