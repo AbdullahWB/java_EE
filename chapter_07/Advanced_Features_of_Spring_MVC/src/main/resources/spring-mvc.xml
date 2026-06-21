@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+http://www.springframework.org/schema/beans/spring-beans.xsd
+http://www.springframework.org/schema/context
+http://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/mvc https://www.springframework.org/schema/mvc/spring-mvc.xsd">
+    <!-- 配置 Spring MVC要扫描的包 -->
+    <context:component-scan base-package="controller"/>
+    <context:component-scan base-package="handle"/>
+    <context:component-scan base-package="exception"/>
+    <context:component-scan base-package="config"/>
+<!--    <mvc:interceptors>-->
+<!--        <mvc:interceptor>-->
+<!--            &lt;!&ndash; 拦截所有请求 &ndash;&gt;-->
+<!--            <mvc:mapping path="/**"/>-->
+<!--            &lt;!&ndash; 放行登录页面 &ndash;&gt;-->
+<!--            <mvc:exclude-mapping path="/login"/>-->
+<!--            &lt;!&ndash; 放行登录提交请求 &ndash;&gt;-->
+<!--            <mvc:exclude-mapping path="/doLogin"/>-->
+<!--            &lt;!&ndash; 配置自定义拦截器 &ndash;&gt;-->
+<!--            <bean class="handle.LoginInterceptor"/>-->
+<!--        </mvc:interceptor>-->
+<!--    </mvc:interceptors>-->
+    <!-- 配置视图解析器 -->
+    <!-- Login verification interceptor -->
+    <mvc:interceptors>
+        <mvc:interceptor>
+            <mvc:mapping path="/**"/>
+            <mvc:exclude-mapping path="/login"/>
+            <mvc:exclude-mapping path="/doLogin"/>
+            <bean class="handle.LoginInterceptor"/>
+        </mvc:interceptor>
+    </mvc:interceptors>
+    <!-- Resolve JSP views from WEB-INF so they cannot be opened directly -->
+    <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="prefix" value="/WEB-INF/pages/"/>
+        <property name="suffix" value=".jsp"/>
+    </bean>
+    <!-- 配置类型转换器工厂 -->
+<!--    <bean id="converterService" class=-->
+<!--            "org.springframework.context.support.ConversionServiceFactoryBean">-->
+<!--        &lt;!&ndash; 给工厂注入一个新的类型转换器 &ndash;&gt;-->
+<!--        <property name="converters">-->
+<!--            <array>-->
+<!--                &lt;!&ndash; 配置自定义类型转换器 &ndash;&gt;-->
+<!--                <bean class="convert.DateConverter"/>-->
+<!--            </array>-->
+<!--        </property>-->
+<!--    </bean>-->
+    <!-- 装载类型转换器工厂 -->
+<!--    <mvc:annotation-driven conversion-service="converterService"/>-->
+    <mvc:annotation-driven/>
+    <!-- 配置简单异常处理器 -->
+    <bean class="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver">
+        <!-- 将异常信息保存到 request 域中，页面中可以通过 ${ex} 获取 -->
+        <property name="exceptionAttribute" value="ex"/>
+        <!-- 配置具体异常与页面之间的映射关系 -->
+        <property name="exceptionMappings">
+            <props>
+                <!-- 空指针异常跳转到 nullPointer.jsp -->
+                <prop key="java.lang.NullPointerException">nullPointer</prop>
+                <!-- IO 异常跳转到 io.jsp -->
+                <prop key="java.io.IOException">io</prop>
+            </props>
+        </property>
+        <!-- 其他没有单独配置的异常，统一跳转到 default.jsp -->
+        <property name="defaultErrorView" value="default"/>
+    </bean>
+</beans>

@@ -1,0 +1,380 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{hyperref}
+\usepackage{caption}
+\usepackage{array}
+
+\geometry{margin=1in}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    urlcolor=blue
+}
+
+\definecolor{codegray}{RGB}{245,245,245}
+\definecolor{codeblue}{RGB}{0,70,140}
+\definecolor{codegreen}{RGB}{0,110,60}
+
+\lstdefinestyle{javastyle}{
+    backgroundcolor=\color{codegray},
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{codeblue}\bfseries,
+    commentstyle=\color{codegreen},
+    stringstyle=\color{red!60!black},
+    breaklines=true,
+    frame=single,
+    columns=fullflexible,
+    showstringspaces=false,
+    tabsize=4
+}
+
+\lstdefinestyle{xmlstyle}{
+    backgroundcolor=\color{codegray},
+    basicstyle=\ttfamily\small,
+    breaklines=true,
+    frame=single,
+    columns=fullflexible,
+    showstringspaces=false,
+    tabsize=4
+}
+
+\newcommand{\screenshot}[3]{
+    \begin{figure}[H]
+        \centering
+        \IfFileExists{#1}{
+            \includegraphics[width=0.92\linewidth]{#1}
+        }{
+            \fbox{
+                \begin{minipage}[c][0.22\textheight][c]{0.88\linewidth}
+                    \centering
+                    \textbf{Screenshot placeholder}\\[0.6em]
+                    Save the image as:\\
+                    \texttt{#1}
+                \end{minipage}
+            }
+        }
+        \caption{#2}
+        \label{#3}
+    \end{figure}
+}
+
+\title{\textbf{Experimental Report: Login Verification in Spring MVC}}
+\author{Student Name: \underline{\hspace{5cm}} \\
+Course: Java EE / Spring MVC}
+\date{June 17, 2026}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+This experiment implements a login verification function in a Spring MVC web application.
+The system protects internal pages from direct access, redirects unauthenticated users to the login page, displays an error message for invalid credentials, stores login status in the session after successful authentication, and clears the session after logout.
+The final application was tested through browser-based page access and form submission.
+\end{abstract}
+
+\section{Experiment Objective}
+
+The objective of this experiment is to complete login verification for a Spring MVC project.
+The required behavior is as follows:
+
+\begin{enumerate}
+    \item Place protected JSP pages under \path{WEB-INF/pages} to prevent direct browser access.
+    \item Redirect unauthenticated users to the login page when they access protected pages.
+    \item Display an error message on the login page when the username or password is incorrect.
+    \item Store the login status in the HTTP session after successful login.
+    \item Clear the login status and redirect to the login page when the user clicks \texttt{Exit}.
+\end{enumerate}
+
+\section{Development Environment}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|>{\bfseries}m{4cm}|m{9cm}|}
+\hline
+Item & Description \\
+\hline
+Language & Java \\
+\hline
+Framework & Spring MVC \\
+\hline
+View Technology & JSP \\
+\hline
+Build Tool & Maven \\
+\hline
+Server for Testing & Jetty / localhost:8080 \\
+\hline
+Protected View Path & \path{src/main/webapp/WEB-INF/pages} \\
+\hline
+\end{tabular}
+\caption{Experimental environment}
+\end{table}
+
+\section{System Design}
+
+The login verification function is implemented using three main parts:
+
+\begin{enumerate}
+    \item \textbf{Controller layer}: validates login credentials, stores the user object in the session, and handles logout.
+    \item \textbf{Interceptor layer}: checks whether \texttt{USER\_SESSION} exists before protected pages are accessed.
+    \item \textbf{View resolver configuration}: loads JSP pages from \path{/WEB-INF/pages/}, preventing direct URL access to JSP files.
+\end{enumerate}
+
+\section{Key Code Modifications}
+
+\subsection{Spring MVC Configuration}
+
+The Spring MVC configuration registers the login interceptor and excludes only the login page and login submission request.
+It also changes the JSP resolver path to \path{/WEB-INF/pages/}.
+
+\begin{lstlisting}[style=xmlstyle,caption={Login interceptor and protected JSP resolver in spring-mvc.xml}]
+<mvc:interceptors>
+    <mvc:interceptor>
+        <mvc:mapping path="/**"/>
+        <mvc:exclude-mapping path="/login"/>
+        <mvc:exclude-mapping path="/doLogin"/>
+        <bean class="handle.LoginInterceptor"/>
+    </mvc:interceptor>
+</mvc:interceptors>
+
+<bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+    <property name="prefix" value="/WEB-INF/pages/"/>
+    <property name="suffix" value=".jsp"/>
+</bean>
+\end{lstlisting}
+
+\screenshot{screenshots/code-spring-mvc.png}
+{Key Spring MVC configuration screenshot}
+{fig:code-spring-mvc}
+
+\subsection{Login Controller}
+
+The controller checks the username and password.
+When the credentials are correct, the user object is stored in the session as \texttt{USER\_SESSION}.
+When the credentials are incorrect, an error message is added to the request model and the login page is returned.
+
+\begin{lstlisting}[style=javastyle,language=Java,caption={Login and logout logic in UserController.java}]
+@RequestMapping("/doLogin")
+public String doLogin(User user, HttpSession session, Model model) {
+    if ("heima".equals(user.getUsername())
+            && "123456".equals(user.getPassword())) {
+        session.setAttribute("USER_SESSION", user);
+        return "redirect:/main";
+    }
+    model.addAttribute("msg", "Username or password is incorrect!");
+    return "login";
+}
+
+@RequestMapping("/logout")
+public String logout(HttpSession session) {
+    session.invalidate();
+    return "redirect:/login";
+}
+\end{lstlisting}
+
+\screenshot{screenshots/code-controller.png}
+{UserController login and logout code screenshot}
+{fig:code-controller}
+
+\subsection{Login Interceptor}
+
+The interceptor checks whether a user object exists in the session.
+If the user is logged in, the request is allowed to continue.
+If the user is not logged in, the request is redirected to \path{/login}.
+
+\begin{lstlisting}[style=javastyle,language=Java,caption={Login verification in LoginInterceptor.java}]
+public boolean preHandle(HttpServletRequest request,
+                         HttpServletResponse response,
+                         Object handler) throws Exception {
+    HttpSession session = request.getSession(false);
+    User user = session == null ? null
+            : (User) session.getAttribute("USER_SESSION");
+
+    if (user != null) {
+        return true;
+    }
+
+    response.sendRedirect(request.getContextPath() + "/login");
+    return false;
+}
+\end{lstlisting}
+
+\screenshot{screenshots/code-interceptor.png}
+{LoginInterceptor session verification code screenshot}
+{fig:code-interceptor}
+
+\subsection{Login Page}
+
+The login page reads the \texttt{msg} request attribute and displays it only when login fails.
+The form submits the username and password to \path{/doLogin}.
+
+\begin{lstlisting}[style=xmlstyle,caption={Login page error message and form}]
+<%
+  String msg = (String) request.getAttribute("msg");
+  if (msg != null) {
+%>
+<div><%= msg %></div>
+<%
+  }
+%>
+
+<form action="${pageContext.request.contextPath}/doLogin" method="post">
+  UserName:<input type="text" name="username"><br>
+  Password:<input type="password" name="password"><br>
+  <input type="submit" value="Login">
+</form>
+\end{lstlisting}
+
+\screenshot{screenshots/code-login-jsp.png}
+{Login JSP code screenshot}
+{fig:code-login-jsp}
+
+\subsection{Main Page}
+
+The main page displays the logged-in username and provides an \texttt{Exit} link for logout.
+
+\begin{lstlisting}[style=xmlstyle,caption={Main page logout link}]
+<ul>
+  <li>Hello:${USER_SESSION.username}</li>
+  <li>
+    <a href="${pageContext.request.contextPath}/logout">Exit</a>
+  </li>
+  <li>
+    <a href="${pageContext.request.contextPath}/orderInfo">
+      Order Information
+    </a>
+  </li>
+</ul>
+\end{lstlisting}
+
+\screenshot{screenshots/code-main-jsp.png}
+{Main JSP code screenshot}
+{fig:code-main-jsp}
+
+\section{Experimental Procedure and Results}
+
+\subsection{Login Page}
+
+The browser accesses \url{http://localhost:8080/login}.
+The login page is displayed with username and password input fields.
+
+\screenshot{screenshots/login-page.png}
+{Login page}
+{fig:login-page}
+
+\subsection{Login Failure}
+
+The following incorrect credentials were submitted:
+
+\begin{itemize}
+    \item Username: \texttt{heima}
+    \item Password: \texttt{wrong}
+\end{itemize}
+
+The system returned to the login page and displayed the error message:
+\texttt{Username or password is incorrect!}
+
+\screenshot{screenshots/login-failure.png}
+{Login failure page}
+{fig:login-failure}
+
+\subsection{Successful Login}
+
+The following correct credentials were submitted:
+
+\begin{itemize}
+    \item Username: \texttt{heima}
+    \item Password: \texttt{123456}
+\end{itemize}
+
+After successful verification, the system saved \texttt{USER\_SESSION} in the session and redirected the user to the main page.
+
+\screenshot{screenshots/main-success.png}
+{Main page after successful login}
+{fig:main-success}
+
+\subsection{Accessing Protected Page Without Login}
+
+When \url{http://localhost:8080/main} is accessed without a valid login session, the interceptor redirects the request to \url{http://localhost:8080/login}.
+
+\screenshot{screenshots/redirect-without-login.png}
+{Redirect to login page when accessing without login}
+{fig:redirect-without-login}
+
+\subsection{Logout Result}
+
+After successful login, the user clicks \texttt{Exit}.
+The server invalidates the session and redirects the browser to the login page.
+After logout, accessing \path{/main} again redirects to \path{/login}.
+
+\screenshot{screenshots/logout-result.png}
+{Logout result}
+{fig:logout-result}
+
+\subsection{Optional System Page}
+
+The order information page is also protected by the same interceptor.
+It can only be accessed after successful login.
+
+\screenshot{screenshots/order-info.png}
+{Protected order information page after login}
+{fig:order-info}
+
+\section{Test Summary}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|m{5cm}|m{5cm}|m{2cm}|}
+\hline
+\textbf{Test Case} & \textbf{Expected Result} & \textbf{Result} \\
+\hline
+Open \path{/login} & Login form is displayed & Pass \\
+\hline
+Submit wrong password & Error message is displayed & Pass \\
+\hline
+Submit correct username and password & Redirect to main page & Pass \\
+\hline
+Access \path{/main} without login & Redirect to login page & Pass \\
+\hline
+Click \texttt{Exit} & Session is cleared and login page is shown & Pass \\
+\hline
+Open old public JSP path & Direct JSP access is blocked & Pass \\
+\hline
+\end{tabular}
+\caption{Login verification test results}
+\end{table}
+
+\section{Conclusion}
+
+This experiment successfully completed login verification in a Spring MVC application.
+The protected pages were moved under \path{WEB-INF/pages}, the view resolver was updated, and the login interceptor was configured to check session login status before allowing access to system pages.
+The controller correctly handles login success, login failure, and logout.
+The browser test results show that unauthenticated users are redirected to the login page, invalid credentials display an error message, and authenticated users can access the main system pages.
+
+\appendix
+\section{Screenshot File Names}
+
+To compile this report with images, save the screenshots using the following file names:
+
+\begin{itemize}
+    \item \path{screenshots/code-spring-mvc.png}
+    \item \path{screenshots/code-controller.png}
+    \item \path{screenshots/code-interceptor.png}
+    \item \path{screenshots/code-login-jsp.png}
+    \item \path{screenshots/code-main-jsp.png}
+    \item \path{screenshots/login-page.png}
+    \item \path{screenshots/login-failure.png}
+    \item \path{screenshots/main-success.png}
+    \item \path{screenshots/redirect-without-login.png}
+    \item \path{screenshots/logout-result.png}
+    \item \path{screenshots/order-info.png}
+\end{itemize}
+
+\end{document}
